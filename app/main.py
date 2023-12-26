@@ -66,40 +66,8 @@ def logged_in_menu(user_id):
             print("Invalid choice. Please try again.")
 
 
-# def view_all_expenses_category(user_id):
-#     # Get all unique categories for the user
-#     categories = set(expense[3] for expense in application.get_all_expenses_category(user_id))
-#
-#     print("Expense Categories:")
-#     for i, category in enumerate(categories, start=1):
-#         print(f"{i}. {category}")
-#
-#     # Ask the user to choose a category
-#     category_choice = input("Choose a category (enter the corresponding number): ")
-#
-#     try:
-#         category_index = int(category_choice) - 1
-#         chosen_category = list(categories)[category_index]
-#         view_expenses_for_category(user_id, chosen_category)
-#     except (ValueError, IndexError):
-#         print("Invalid choice. Please try again.")
-#
-#
-# def view_expenses_for_category(user_id, category):
-#     expenses_for_category = application.get_expenses_for_category(user_id, category)
-#     print(f"All Expenses for {category}:")
-#     for expense in expenses_for_category:
-#         print(expense)
-#
-#
-# def view_all_expenses_by_category(user_id):
-#     all_expenses_category = application.get_all_expenses_category(user_id)
-#     print("All Expenses by Category:")
-#     for expense in all_expenses_category:
-#         print(expense)
-
-
 if __name__ == '__main__':
     application.create_database()
+    application.create_test_user()  # voer dit uit als je de database wilt vullen met een voorgemaakte testuser
     main_menu()
     application.conn.close()
