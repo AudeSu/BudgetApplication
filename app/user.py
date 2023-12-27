@@ -1,6 +1,6 @@
 import sqlite3
 
-from app import menu
+import menu
 from decouple import config
 from database import cursor, conn, hash_password, verify_password
 
