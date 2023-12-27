@@ -1,26 +1,44 @@
-from decouple import config
 import sqlite3
 import menu
 import csv
-from database import cursor, conn, hash_password
+
+from decouple import config
+from database import cursor, conn, hash_password, verify_password
 
 DATABASE_URL = config("DATABASE_URL")
 SECRET_KEY = config("SECRET_KEY")
 
 
-def register_user():
-    username = input("Enter your username: ")
-    email = input("Enter your email: ")
-    password = input("Enter your password: ")
+# def register_user():
+#     username = input("Enter your username: ")
+#     email = input("Enter your email: ")
+#     password = input("Enter your password: ")
+#
+#     try:
+#         hashed_password = hash_password(password)
+#         cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+#                        (username, email, hashed_password))
+#         conn.commit()
+#         print("User registered successfully!")
+#     except sqlite3.IntegrityError:
+#         print("Username or email already in use. Please choose different username and/or email.")
 
-    try:
-        hashed_password = hash_password(password)
-        cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                       (username, email, hashed_password))
-        conn.commit()
-        print("User registered successfully!")
-    except sqlite3.IntegrityError:
-        print("Username or email already in use. Please choose different username and/or email.")
+
+# def login_user():
+#     username = input("Enter your username: ")
+#     password = input("Enter your password: ")
+#
+#     try:
+#         cursor.execute("SELECT * FROM users WHERE username=? AND password=?",
+#                        (username, password))
+#         user = cursor.fetchone()
+#         if user:
+#             user_id = user[0]
+#             menu.logged_in_menu(user_id)
+#         else:
+#             print("Invalid username or password. Please try again.")
+#     except sqlite3.IntegrityError as e:
+#         print(f"Database error: {e}")
 
 
 def login_user():
@@ -28,14 +46,18 @@ def login_user():
     password = input("Enter your password: ")
 
     try:
-        cursor.execute("SELECT * FROM users WHERE username=? AND password=?",
-                       (username, password))
+        cursor.execute("SELECT * FROM users WHERE username=?",
+                       (username,))
         user = cursor.fetchone()
         if user:
-            user_id = user[0]
-            menu.logged_in_menu(user_id)
+            stored_password = user[3]  # Het gehashte wachtwoord uit de database
+            if verify_password(password, stored_password):
+                user_id = user[0]
+                menu.logged_in_menu(user_id)
+            else:
+                print("Invalid password. Please try again.")
         else:
-            print("Invalid username or password. Please try again.")
+            print("Invalid username. Please try again.")
     except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 

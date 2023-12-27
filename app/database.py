@@ -71,7 +71,13 @@ def create_test_user():
 
 
 def hash_password(password):
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed_password.decode('utf-8')
+
+
+def verify_password(raw_password, hashed_password):
+    return bcrypt.checkpw(raw_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 
 def close_database():
