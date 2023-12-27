@@ -38,7 +38,7 @@ def logged_in_menu(user_id):
         print("7. Edit expense")
         print("8. Delete income")
         print("9. Delete expense")
-        print("10. Exit")
+        print("10. Sign out")
 
         choice = input("Enter your choice: ")
 

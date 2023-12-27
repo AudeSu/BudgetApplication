@@ -1,5 +1,4 @@
 import sqlite3
-
 import main
 
 conn = sqlite3.connect("../data/budget.db")
@@ -39,7 +38,7 @@ def create_database():
     """)
 
 
-def create_test_user():
+def create_test_user():  # TODO: als deze user al eens aangemaakt is hoeft deze niet meer aangemaakt te worden
     cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
                    ('testuser', 'test@example.com', 'testpassword'))
     conn.commit()
@@ -69,22 +68,13 @@ def register_user():
     email = input("Enter your email: ")
     password = input("Enter your password: ")
 
-    cursor.execute("SELECT id FROM users WHERE username=?", (username,))
-    existing_username = cursor.fetchone()
-    if existing_username:
-        print(f"Username '{username}' is already in use. Please choose a different username.")
-        return
-
-    cursor.execute("SELECT id FROM users WHERE email=?", (email,))
-    existing_email = cursor.fetchone()
-    if existing_email:
-        print(f"Email '{email}' is already in use. Please choose a different email.")
-        return
-
-    cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                   (username, email, password))
-    conn.commit()
-    print("User registered successfully!")
+    try:
+        cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+                       (username, email, password))
+        conn.commit()
+        print("User registered successfully!")
+    except sqlite3.IntegrityError:
+        print("Username or email already in use. Please choose different username and/or email.")
 
 
 def login_user():
@@ -115,7 +105,8 @@ def get_total_expense(user_id):
     print("Total Expense:", total_expense if total_expense else 0.0, "EUR")
 
 
-def get_total_expense_by_category(user_id):
+def get_total_expense_by_category(
+        user_id):  # TODO: zet dit nog in een mooie tabel, want momenteel zijn er rare inspringen
     cursor.execute("SELECT category, SUM(amount) FROM expenses WHERE user_id=? GROUP BY category",
                    (user_id,))
     expense_by_category = cursor.fetchall()
@@ -125,7 +116,7 @@ def get_total_expense_by_category(user_id):
         print(f"\t> {category}: {amount} EUR")
 
 
-def view_all_incomes(user_id):
+def view_all_incomes(user_id):  # TODO: zet dit nog in een mooie tabel, want momenteel zijn er rare inspringen
     cursor.execute("SELECT id, amount, description FROM incomes WHERE user_id=?",
                    (user_id,))
     all_incomes = cursor.fetchall()
@@ -140,7 +131,7 @@ def view_all_incomes(user_id):
         print(f"{income_id}: {amount} EUR\t\tDescription: {description}")
 
 
-def view_all_expenses(user_id):
+def view_all_expenses(user_id):  # TODO: zet dit nog in een mooie tabel, want momenteel zijn er rare inspringen
     cursor.execute("SELECT id, amount, category, description FROM expenses WHERE user_id=?",
                    (user_id,))
     all_expenses = cursor.fetchall()
@@ -155,7 +146,8 @@ def view_all_expenses(user_id):
         print(f"{expense_id}: {amount} EUR\t\tCategory: {category}\t\tDescription: {description}")
 
 
-def view_all_expenses_by_selected_category(user_id):
+def view_all_expenses_by_selected_category(
+        user_id):  # TODO: zet dit nog in een mooie tabel, want momenteel zijn er rare inspringen
     cursor.execute("SELECT DISTINCT category FROM expenses WHERE user_id=?", (user_id,))
     categories = [category[0] for category in cursor.fetchall()]
 
@@ -167,7 +159,12 @@ def view_all_expenses_by_selected_category(user_id):
     for category in categories:
         print(category)
 
-    selected_category = input("Enter the category to view expenses: ")
+    while True:
+        selected_category = input("Enter the category to view expenses: ").title()
+        if selected_category in categories:
+            break
+        else:
+            print("Invalid category. Please choose a valid category.")
 
     cursor.execute("SELECT id, amount, description FROM expenses WHERE user_id=? AND category=?",
                    (user_id, selected_category))
@@ -192,16 +189,18 @@ def add_income(user_id):
 
 
 def add_expense(user_id):
+    cursor.execute("SELECT DISTINCT category FROM expenses WHERE user_id=?", (user_id,))
+    categories = [category[0] for category in cursor.fetchall()]
+
     amount = float(input("Enter the expense amount: "))
 
-    valid_categories = ['Groceries', 'Electricity', 'Entertainment', 'Rent', 'Dining', 'Shopping',
-                        'Transportation', 'Medical', 'Subscription', 'Other']
-
-    print("Valid Categories:", ", ".join(valid_categories))
+    print("Expense Categories:")
+    for category in categories:
+        print(category)
 
     while True:
         category = input("Enter the expense category: ").title()
-        if category in valid_categories:
+        if category in categories:
             break
         else:
             print("Invalid category. Please choose a valid category.")
@@ -213,7 +212,6 @@ def add_expense(user_id):
     print("Expense added successfully!")
 
 
-#  TODO: edit werkt blijkbaar nog niet
 def edit_income(user_id):
     view_all_incomes(user_id)
     income_id = input("Enter the ID of the income you want to edit: ")
@@ -226,18 +224,20 @@ def edit_income(user_id):
 
 
 def edit_expense(user_id):
-    view_all_incomes(user_id)
+    cursor.execute("SELECT DISTINCT category FROM expenses WHERE user_id=?", (user_id,))
+    categories = [category[0] for category in cursor.fetchall()]
+
+    view_all_expenses(user_id)
     expense_id = input("Enter the ID of the expense you want to edit: ")
     amount = float(input("Enter the expense amount: "))
 
-    valid_categories = ['Groceries', 'Electricity', 'Entertainment', 'Rent', 'Dining', 'Shopping',
-                        'Transportation', 'Medical', 'Subscription', 'Other']
-
-    print("Valid Categories:", ", ".join(valid_categories))
+    print("Expense Categories:")
+    for category in categories:
+        print(category)
 
     while True:
         category = input("Enter the expense category: ").title()
-        if category in valid_categories:
+        if category in categories:
             break
         else:
             print("Invalid category. Please choose a valid category.")
@@ -249,7 +249,6 @@ def edit_expense(user_id):
     print(f"Expense with ID {expense_id} edited successfully.")
 
 
-#  TODO: delete werkt blijkbaar ook nog niet
 def delete_income(user_id):
     view_all_incomes(user_id)
     income_id = input("Enter the ID of the income you want to delete: ")
@@ -260,11 +259,13 @@ def delete_income(user_id):
 
 
 def delete_expense(user_id):
-    view_all_incomes(user_id)
+    view_all_expenses(user_id)
     expense_id = input("Enter the ID of the expense you want to delete: ")
     cursor.execute("DELETE FROM expenses WHERE id=?",
                    (expense_id,))
     conn.commit()
     print(f"Expense with ID {expense_id} deleted successfully.")
 
-#  TODO: Ik moet al de gegevens nog wegschrijven naar een extern bestand
+#  TODO: Ik moet al de gegevens nog wegschrijven naar een extern bestand --> extra methode hiervoor schrijven
+#  TODO: Output van methoden moet in een overzichtelijke table weergegeven worden ipv rare inspringen van "\t"
+#  TODO: Clean code --> kuis de code op --> geen duplicate code meer
