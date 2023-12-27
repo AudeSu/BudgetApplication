@@ -43,8 +43,9 @@ def create_database():
 
 def create_test_user():
     try:
+        hashed_password = hash_password('testpassword')
         cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                       ('testuser', 'test@example.com', 'testpassword'))
+                       ('testuser', 'test@example.com', hashed_password))
         conn.commit()
 
         cursor.execute("SELECT id FROM users WHERE username=?", ('testuser',))

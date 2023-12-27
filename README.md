@@ -28,6 +28,15 @@ De database heeft drie tabellen: users, incomes en expenses
 ## Hoe de applicatie te runnen:
 
 Nadat u de repository heeft gecloned installeer je de requirements en dan zou je de applicatie kunnen runnen.
-> - git clone https://github.com/AudeSu/BudgetApplication.git
-> - pip install -r requirements.txt
-> - python main.py
+>```git clone https://github.com/AudeSu/BudgetApplication.git```
+
+>```pip install -r requirements.txt```
+
+> maak een eigen .env bestand met volgende inhoud:
+        
+        DATABASE_URL=sqlite:///../data/budget.db
+
+        SECRET_KEY=mysecretkey
+>```python main.py```
+
+> Er zou al een testuser aanwezig moeten zijn met username: "testuser" en password: "testpassword"
