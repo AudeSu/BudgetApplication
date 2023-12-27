@@ -24,9 +24,11 @@ def main_menu():
 
 def logged_in_menu(user_id):
     while True:
+        print("========================================")
         application.get_total_income(user_id)
         application.get_total_expense(user_id)
         application.get_total_expense_by_category(user_id)
+        print("========================================")
         print("1. View all incomes")
         print("2. View all expenses")
         print("3. View all expenses for a category")
@@ -44,8 +46,6 @@ def logged_in_menu(user_id):
             application.view_all_incomes(user_id)
         elif choice == '2':
             application.view_all_expenses(user_id)
-            print("===============gesorteerd per category========")
-            application.view_all_expenses_by_category(user_id)
         elif choice == '3':
             application.view_all_expenses_by_selected_category(user_id)
         elif choice == '4':
@@ -68,6 +68,6 @@ def logged_in_menu(user_id):
 
 if __name__ == '__main__':
     application.create_database()
-    application.create_test_user()  # voer dit uit als je de database wilt vullen met een voorgemaakte testuser
+    #  application.create_test_user()  # voer dit uit als je de database wilt vullen met een voorgemaakte testuser
     main_menu()
     application.conn.close()
