@@ -1,7 +1,11 @@
 import sqlite3
+from decouple import config
+import bcrypt
 
 with sqlite3.connect("../data/budget.db") as conn:
     cursor = conn.cursor()
+
+SECRET_KEY = config("SECRET_KEY")
 
 
 def create_database():
@@ -64,6 +68,10 @@ def create_test_user():
 
     except sqlite3.IntegrityError:
         print("Test user already exists.")
+
+
+def hash_password(password):
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
 
 def close_database():

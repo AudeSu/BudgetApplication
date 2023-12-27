@@ -1,7 +1,11 @@
+from decouple import config
 import sqlite3
 import menu
 import csv
-from database import cursor, conn
+from database import cursor, conn, hash_password
+
+DATABASE_URL = config("DATABASE_URL")
+SECRET_KEY = config("SECRET_KEY")
 
 
 def register_user():
@@ -10,8 +14,9 @@ def register_user():
     password = input("Enter your password: ")
 
     try:
+        hashed_password = hash_password(password)
         cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                       (username, email, password))
+                       (username, email, hashed_password))
         conn.commit()
         print("User registered successfully!")
     except sqlite3.IntegrityError:
@@ -22,14 +27,17 @@ def login_user():
     username = input("Enter your username: ")
     password = input("Enter your password: ")
 
-    cursor.execute("SELECT * FROM users WHERE username=? AND password=?",
-                   (username, password))
-    user = cursor.fetchone()
-    if user:
-        user_id = user[0]
-        menu.logged_in_menu(user_id)
-    else:
-        print("Invalid username or password. Please try again.")
+    try:
+        cursor.execute("SELECT * FROM users WHERE username=? AND password=?",
+                       (username, password))
+        user = cursor.fetchone()
+        if user:
+            user_id = user[0]
+            menu.logged_in_menu(user_id)
+        else:
+            print("Invalid username or password. Please try again.")
+    except sqlite3.IntegrityError as e:
+        print(f"Database error: {e}")
 
 
 def get_total_income(user_id):
@@ -38,7 +46,7 @@ def get_total_income(user_id):
                        (user_id,))
         total_income = cursor.fetchone()[0]
         print(f"Total Income: {total_income if total_income else 0.0} EUR")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -48,7 +56,7 @@ def get_total_expense(user_id):
                        (user_id,))
         total_expense = cursor.fetchone()[0]
         print(f"Total Expense: {total_expense if total_expense else 0.0} EUR")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -63,7 +71,7 @@ def get_total_expense_by_category(user_id):
         print("-" * 35)
         for category, amount in expense_by_category:
             print("{:<20} {:<15}".format(category, amount))
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -81,7 +89,7 @@ def view_all_incomes(user_id):
         print("-" * 70)
         for income_id, amount, description in all_incomes:
             print("{:<5} {:<15} {:<20}".format(income_id, amount, description))
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -99,7 +107,7 @@ def view_all_expenses(user_id):
         print("-" * 70)
         for expense_id, amount, category, description in all_expenses:
             print("{:<5} {:<15} {:<20} {:<20}".format(expense_id, amount, category, description))
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -136,7 +144,7 @@ def view_all_expenses_by_selected_category(user_id):
         print("-" * 40)
         for expense_id, amount, description in expenses_for_category:
             print("{:<5} {:<15} {:<20}".format(expense_id, amount, description))
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -148,7 +156,7 @@ def add_income(user_id):
                        (user_id, amount, description))
         conn.commit()
         print("Income added successfully!")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -173,7 +181,7 @@ def add_expense(user_id):
                        (user_id, amount, category, description))
         conn.commit()
         print("Expense added successfully!")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -187,7 +195,7 @@ def edit_income(user_id):
                        (amount, description, income_id))
         conn.commit()
         print(f"Income with ID {income_id} edited successfully.")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -214,7 +222,7 @@ def edit_expense(user_id):
                        (amount, category, description, expense_id))
         conn.commit()
         print(f"Expense with ID {expense_id} edited successfully.")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -226,7 +234,7 @@ def delete_income(user_id):
                        (income_id,))
         conn.commit()
         print(f"Income with ID {income_id} deleted successfully.")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -238,7 +246,7 @@ def delete_expense(user_id):
                        (expense_id,))
         conn.commit()
         print(f"Expense with ID {expense_id} deleted successfully.")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
 
 
@@ -253,7 +261,7 @@ def export_data_to_csv(user_id):
         cursor.execute("SELECT id, amount, category, description FROM expenses WHERE user_id=?", (user_id,))
         expenses = cursor.fetchall()
 
-        filename = f"{username}_budget_data.csv"
+        filename = f"../data/{username}_budget_data.csv"
 
         with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file, delimiter=';', quoting=csv.QUOTE_ALL)
@@ -269,5 +277,5 @@ def export_data_to_csv(user_id):
                 writer.writerow(expense)
 
         print(f"Data is succesvol geëxporteerd naar {filename}.")
-    except sqlite3.Error as e:
+    except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")

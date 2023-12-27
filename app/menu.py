@@ -1,4 +1,6 @@
 import application
+
+
 def display_menu():
     print("1. Register")
     print("2. Login")
@@ -36,7 +38,7 @@ def logged_in_menu(user_id):
         print("7. Edit expense")
         print("8. Delete income")
         print("9. Delete expense")
-        print("10. Export data to Excel")
+        print("10. Export data to CSV")
         print("11. Sign out")
 
         choice = input("Enter your choice: ")
