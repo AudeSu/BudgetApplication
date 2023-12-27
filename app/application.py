@@ -1,5 +1,6 @@
 import sqlite3
 import main
+import csv
 
 conn = sqlite3.connect("../data/budget.db")
 cursor = conn.cursor()
@@ -268,8 +269,29 @@ def delete_expense(user_id):
     print(f"Expense with ID {expense_id} deleted successfully.")
 
 
-#  TODO: Ik moet al de gegevens nog wegschrijven naar een extern bestand --> extra methode hiervoor schrijven
-def export_data_to_excel(user_id):
-    return None
+def export_data_to_csv(user_id):
+    cursor.execute("SELECT username FROM users WHERE id=?", (user_id,))
+    username = cursor.fetchone()[0]
 
-#  TODO: Clean code --> kuis de code op --> geen duplicate code meer
+    cursor.execute("SELECT id, amount, description FROM incomes WHERE user_id=?", (user_id,))
+    incomes = cursor.fetchall()
+
+    cursor.execute("SELECT id, amount, category, description FROM expenses WHERE user_id=?", (user_id,))
+    expenses = cursor.fetchall()
+
+    filename = f"{username}_budget_data.csv"
+
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file, delimiter=';', quoting=csv.QUOTE_ALL)
+
+        writer.writerow(["Income_ID", "Amount", "Description"])
+        for income in incomes:
+            writer.writerow(income)
+
+        writer.writerow([])
+
+        writer.writerow(["Expense_ID", "Amount", "Category", "Description"])
+        for expense in expenses:
+            writer.writerow(expense)
+
+    print(f"Data is succesvol geëxporteerd naar {filename}.")
