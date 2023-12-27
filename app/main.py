@@ -38,7 +38,8 @@ def logged_in_menu(user_id):
         print("7. Edit expense")
         print("8. Delete income")
         print("9. Delete expense")
-        print("10. Sign out")
+        print("10. Export data to excel")
+        print("11. Sign out")
 
         choice = input("Enter your choice: ")
 
@@ -61,6 +62,8 @@ def logged_in_menu(user_id):
         elif choice == '9':
             application.delete_expense(user_id)
         elif choice == '10':
+            application.export_data_to_excel(user_id)
+        elif choice == '11':
             break
         else:
             print("Invalid choice. Please try again.")
@@ -68,6 +71,6 @@ def logged_in_menu(user_id):
 
 if __name__ == '__main__':
     application.create_database()
-    #  application.create_test_user()  # voer dit uit als je de database wilt vullen met een voorgemaakte testuser
+    application.create_test_user()
     main_menu()
     application.conn.close()
