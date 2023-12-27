@@ -2,7 +2,7 @@ import sqlite3
 
 from app import menu
 from decouple import config
-from database import cursor, conn, hash_password
+from database import cursor, conn, hash_password, verify_password
 
 DATABASE_URL = config("DATABASE_URL")
 SECRET_KEY = config("SECRET_KEY")
@@ -26,13 +26,17 @@ class User:
 
     def login(self):
         try:
-            cursor.execute("SELECT * FROM users WHERE username=? AND password=?",
-                           (self.username, self.password))
+            cursor.execute("SELECT * FROM users WHERE username=?",
+                           (self.username,))
             user = cursor.fetchone()
             if user:
-                user_id = user[0]
-                menu.logged_in_menu(user_id)
+                stored_password = user[3]
+                if verify_password(self.password, stored_password):
+                    user_id = user[0]
+                    menu.logged_in_menu(user_id)
+                else:
+                    print("Invalid password. Please try again.")
             else:
-                print("Invalid username or password. Please try again.")
+                print("Invalid username. Please try again.")
         except sqlite3.IntegrityError as e:
             print(f"Database error: {e}")

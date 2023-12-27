@@ -8,21 +8,24 @@ def display_menu():
 
 
 def main_menu():
+    from user import User
     while True:
         display_menu()
         choice = input("Enter your choice: ")
 
         if choice == '1':
-            from user import User
             username = input("Enter your username: ")
             email = input("Enter your email: ")
             password = input("Enter your password: ")
 
             user = User(username, email, password)
             user.register()
-            # application.register_user()
         elif choice == '2':
-            application.login_user()
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+
+            user = User(username, "", password)
+            user.login()
         elif choice == '3':
             break
         else:
