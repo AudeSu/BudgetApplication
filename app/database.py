@@ -1,11 +1,26 @@
+import os
 import sqlite3
 from decouple import config
 import bcrypt
 
-with sqlite3.connect("../data/budget.db") as conn:
-    cursor = conn.cursor()
-
 SECRET_KEY = config("SECRET_KEY")
+
+
+def create_data_folder():
+    folder_name = "data"
+    project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Navigeer een niveau omhoog
+    data_path = os.path.join(project_path, folder_name)
+
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+
+    return data_path
+
+
+database_path = os.path.join(create_data_folder(), "budget.db")
+
+with sqlite3.connect(database_path) as conn:
+    cursor = conn.cursor()
 
 
 def create_database():
