@@ -54,7 +54,7 @@ def view_all_incomes(user_id):
 
         print("All Incomes:")
         print("{:<5} {:<15} {:<20}".format("ID", "Amount (EUR)", "Description"))
-        print("-" * 70)
+        print("-" * 40)
         for income_id, amount, description in all_incomes:
             print("{:<5} {:<15} {:<20}".format(income_id, amount, description))
     except sqlite3.IntegrityError as e:
