@@ -25,6 +25,8 @@ De database heeft drie tabellen: users, incomes en expenses
 - Income(id (PK), user_id (FK), amount, description)
 - Expense(id (PK), user_id (FK), amount, category, description)
 
+De volledige database wordt zelf aangemaakt dit staat in het database.py bestand uitgeschreven, je hoeft dus zelf enkel maar de main.py te runnen en alles zou moeten werken.
+
 ## Hoe de applicatie te runnen:
 
 Eerst cloned u de repositroy, daarna installeer je de packages uit het requirements.txt bestand en als laatst maakt u een eigen .env bestand. Nu zou u in staat moeten zijn om de applicatie te runnen. Let er altijd op dat je in de juiste map staat wanneer je een commando uitvoert
